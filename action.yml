@@ -29,7 +29,7 @@ inputs:
     default: ${{ github.token }}
   cli-version:
     description: Version of @jojapi/cli to run.
-    default: 0.1.1
+    default: 0.1.2
 
 outputs:
   status:

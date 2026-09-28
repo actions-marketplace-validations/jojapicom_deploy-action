@@ -1,13 +1,13 @@
-name: Deploy to jojapi
-description: Deploy a jojapi API's Worker. A preview deployment for every pull request, production on the default branch.
-author: jojapi
+name: Deploy to JoJ API
+description: Deploy a JoJ API Worker. A preview deployment for every pull request, production on the default branch.
+author: Apryco, LLC
 branding:
   icon: upload-cloud
   color: blue
 
 inputs:
   token:
-    description: Management API token of the jojapi account that owns the API, with the code:read and code:write scopes. Pass it from a secret.
+    description: Management API token of the JoJ API account that owns the API, with the code:read and code:write scopes. Pass it from a secret.
     required: true
   working-directory:
     description: Folder with the API's jojapi.json and Worker files.

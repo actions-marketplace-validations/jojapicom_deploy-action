@@ -65,7 +65,7 @@ export function parseResult(code, stdout, stderr) {
     const message = [result.message || errorText(stderr) || result.status, ...errors.slice(1)].join("\n");
     return { ...result, status: "failed", message };
   }
-  return { status: "failed", message: errorText(stderr) ?? `the jojapi CLI exited with code ${code}` };
+  return { status: "failed", message: errorText(stderr) ?? `@jojapi/cli exited with code ${code}` };
 }
 
 function errorText(stderr) {
@@ -94,7 +94,7 @@ export function headline(result) {
     case "unchanged":
       return "Nothing to deploy: the files match the platform";
     case "skipped":
-      return "Skipped: no jojapi token";
+      return "Skipped: no JoJ API token";
     default:
       return "Deployment failed";
   }
@@ -102,7 +102,7 @@ export function headline(result) {
 
 // Markdown for the job summary and the pull request comment
 export function report(result, context) {
-  const lines = [`**jojapi** · \`${context.slug}\` · ${headline(result)}`, ""];
+  const lines = [`**JoJ API** · \`${context.slug}\` · ${headline(result)}`, ""];
   const deployment = result.deployment ?? null;
   if (result.status === "deployed" && deployment?.url) {
     lines.push("| Deployment | URL |", "| --- | --- |", `| #${deployment.number} \`${deployment.id}\` | ${deployment.url} |`, "");
@@ -174,7 +174,7 @@ export async function upsertComment({ apiUrl, repository, pr, token, marker, bod
 function escapeData(text) {
   return String(text).replaceAll("%", "%25").replaceAll("\r", "%0D").replaceAll("\n", "%0A");
 }
-function annotate(level, message, title = "jojapi") {
+function annotate(level, message, title = "JoJ API") {
   console.log(`::${level} title=${title}::${escapeData(message)}`);
 }
 
@@ -240,7 +240,7 @@ export async function main(env = process.env) {
     return 1;
   }
 
-  console.log(`jojapi: deploying ${slug} as ${production ? "production" : "a preview"} with @jojapi/cli@${env.INPUT_CLI_VERSION}`);
+  console.log(`JoJ API: deploying ${slug} as ${production ? "production" : "a preview"} with @jojapi/cli@${env.INPUT_CLI_VERSION}`);
   const { code, stdout, stderr } = await runCli(args, env);
   const result = parseResult(code, stdout, stderr);
   writeOutputs(env, outputs(result));
@@ -256,12 +256,12 @@ export async function main(env = process.env) {
 
   const deployment = result.deployment ?? null;
   if (result.status === "deployed") {
-    console.log(`jojapi: ${headline(result)}${deployment ? ` — #${deployment.number} ${deployment.id} ${deployment.url}` : ""}`);
+    console.log(`JoJ API: ${headline(result)}${deployment ? ` — #${deployment.number} ${deployment.id} ${deployment.url}` : ""}`);
     if (result.message) annotate("warning", result.message);
   } else if (result.status === "unchanged") {
     annotate("notice", headline(result));
   } else {
-    annotate("error", result.message, "jojapi deploy failed");
+    annotate("error", result.message, "JoJ API deploy failed");
   }
 
   const commentWanted = String(env.INPUT_COMMENT ?? "true").trim().toLowerCase() !== "false";
@@ -275,7 +275,7 @@ export async function main(env = process.env) {
         marker: commentMarker(slug),
         body,
       });
-      console.log(`jojapi: pull request comment ${done}`);
+      console.log(`JoJ API: pull request comment ${done}`);
     } catch (err) {
       const hint = err.status === 403 || err.status === 404 ? " Give the job `permissions: pull-requests: write`, or set comment: false." : "";
       annotate("warning", `Could not comment on the pull request: ${err.message}.${hint}`);

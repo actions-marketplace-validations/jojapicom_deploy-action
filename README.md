@@ -1,6 +1,6 @@
-# jojapi deploy action
+# Deploy to JoJ API
 
-Deploy a [jojapi](https://jojapi.com) API's Worker from GitHub Actions. Every pull request gets a
+Deploy a [JoJ API](https://jojapi.com) Worker from GitHub Actions. Every pull request gets a
 [preview deployment](https://docs.jojapi.com/studio/deployments) on its own URL, commented on the
 pull request; every push to the default branch goes to production. Each deployment records its
 commit, branch and pull request, so the Studio's **Deployments** tab links to the code it runs.
@@ -25,7 +25,7 @@ commit, branch and pull request, so the Studio's **Deployments** tab links to th
 4. **Add the workflow** as `.github/workflows/jojapi.yml`:
 
 ```yaml
-name: Deploy to jojapi
+name: Deploy to JoJ API
 
 on:
   push:
@@ -116,7 +116,7 @@ keeps its own pull request comment.
 ## Security
 
 The token reaches only the `jojapi` CLI process, as `JOJAPI_TOKEN`; the action never prints it and
-the CLI never sends it anywhere but the jojapi Management API. Use `pull_request`, not
+the CLI never sends it anywhere but the JoJ API Management API. Use `pull_request`, not
 `pull_request_target`: the latter would deploy code from forks with your token.
 
 ## Versions

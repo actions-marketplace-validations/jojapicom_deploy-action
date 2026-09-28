@@ -49,7 +49,7 @@ test("results: the CLI's JSON line, refusals and crashes become failed with thei
   assert.deepEqual(crashed, { status: "failed", message: "GET v2/provider-api-edge: TEST token revoked" });
 
   assert.equal(parseResult(1, "", "npm error 404 Not Found\nnpm error TEST log\n").message, "npm error 404 Not Found\nnpm error TEST log");
-  assert.equal(parseResult(1, "", "").message, "the jojapi CLI exited with code 1");
+  assert.equal(parseResult(1, "", "").message, "@jojapi/cli exited with code 1");
 });
 
 test("report: a preview names its URL and how it reaches production; a failure shows the error", () => {
@@ -217,7 +217,7 @@ test("a failed deploy fails the step with the CLI's error, in the log and on the
   try {
     const result = await runStep(ws, github, { FAKE_STDOUT: "", FAKE_STDERR: "jojapi: TEST build failed: No such module \"lib/x.mjs\"\n", FAKE_CODE: "1" });
     assert.equal(result.code, 1);
-    assert.match(result.stdout, /::error title=jojapi deploy failed::TEST build failed: No such module "lib\/x.mjs"/);
+    assert.match(result.stdout, /::error title=JoJ API deploy failed::TEST build failed: No such module "lib\/x.mjs"/);
     assert.equal(readOutputs(ws).status, "failed");
     assert.match(github.comments[0].body, /Deployment failed[\s\S]*TEST build failed/);
   } finally {
@@ -229,7 +229,7 @@ test("without a token: pull requests from forks and Dependabot are skipped; anyt
   const fork = workspace({ ...PR_EVENT, pull_request: { ...PR_EVENT.pull_request, head: { sha: "a".repeat(40), repo: { full_name: "someone/r" } } } });
   const skipped = await runStep(fork, null, { JOJAPI_TOKEN: "" });
   assert.equal(skipped.code, 0);
-  assert.match(skipped.stdout, /::notice title=jojapi::Pull requests from forks and Dependabot/);
+  assert.match(skipped.stdout, /::notice title=JoJ API::Pull requests from forks and Dependabot/);
   assert.equal(readOutputs(fork).status, "skipped");
 
   const dependabot = workspace({ ...PR_EVENT, pull_request: { ...PR_EVENT.pull_request, head: { sha: "a".repeat(40), repo: { full_name: "o/r" } } } });
@@ -239,12 +239,12 @@ test("without a token: pull requests from forks and Dependabot are skipped; anyt
   const own = workspace({ ...PR_EVENT, pull_request: { ...PR_EVENT.pull_request, head: { sha: "a".repeat(40), repo: { full_name: "o/r" } } } });
   const misconfigured = await runStep(own, null, { JOJAPI_TOKEN: " ", GITHUB_ACTOR: "someone" });
   assert.equal(misconfigured.code, 1);
-  assert.match(misconfigured.stdout, /::error title=jojapi::The token input is empty: the secret passed as token is not set or empty/);
+  assert.match(misconfigured.stdout, /::error title=JoJ API::The token input is empty: the secret passed as token is not set or empty/);
 
   const push = workspace({ repository: { default_branch: "main" } });
   const failed = await runStep(push, null, { JOJAPI_TOKEN: "", GITHUB_REF: "refs/heads/main" });
   assert.equal(failed.code, 1);
-  assert.match(failed.stdout, /::error title=jojapi::The token input is empty/);
+  assert.match(failed.stdout, /::error title=JoJ API::The token input is empty/);
 });
 
 test("a comment that cannot be written warns but keeps the deploy green", async () => {
@@ -253,7 +253,7 @@ test("a comment that cannot be written warns but keeps the deploy green", async 
   try {
     const result = await runStep(ws, github, {});
     assert.equal(result.code, 0);
-    assert.match(result.stdout, /::warning title=jojapi::Could not comment on the pull request: GET .*HTTP 404 Not Found/);
+    assert.match(result.stdout, /::warning title=JoJ API::Could not comment on the pull request: GET .*HTTP 404 Not Found/);
   } finally {
     github.server.close();
   }

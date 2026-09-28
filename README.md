@@ -40,7 +40,7 @@ jobs:
       pull-requests: write # the preview URL comment
     concurrency: jojapi-${{ github.ref }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: jojapicom/deploy-action@v1
         with:
           token: ${{ secrets.JOJAPI_TOKEN }}

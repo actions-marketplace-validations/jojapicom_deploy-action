@@ -1,0 +1,91 @@
+name: Deploy to jojapi
+description: Deploy a jojapi API's Worker. A preview deployment for every pull request, production on the default branch.
+author: jojapi
+branding:
+  icon: upload-cloud
+  color: blue
+
+inputs:
+  token:
+    description: Management API token of the jojapi account that owns the API, with the code:read and code:write scopes. Pass it from a secret.
+    required: true
+  working-directory:
+    description: Folder with the API's jojapi.json and Worker files.
+    default: "."
+  production:
+    description: "auto: production on pushes to the default branch, a preview otherwise. true or false forces it."
+    default: auto
+  message:
+    description: Description of the deployment. Defaults to the pull request title or the commit subject.
+    default: ""
+  comment:
+    description: Comment the preview URL on the pull request (needs the pull-requests write permission).
+    default: "true"
+  install:
+    description: "auto: run npm ci when package-lock.json exists and node_modules does not. true runs npm ci (npm install without a lock file), false skips it."
+    default: auto
+  github-token:
+    description: Token used to comment on the pull request.
+    default: ${{ github.token }}
+  cli-version:
+    description: Version of @jojapi/cli to run.
+    default: 0.1.1
+
+outputs:
+  status:
+    description: "deployed, unchanged, failed or skipped"
+    value: ${{ steps.deploy.outputs.status }}
+  url:
+    description: URL of the new deployment (https://{api}--{id}.jojapi.dev)
+    value: ${{ steps.deploy.outputs.url }}
+  deployment-id:
+    description: Id of the new deployment
+    value: ${{ steps.deploy.outputs.deployment-id }}
+  deployment-number:
+    description: Number of the new deployment
+    value: ${{ steps.deploy.outputs.deployment-number }}
+  preview-url:
+    description: URL that follows the latest deployment (https://{api}--preview.jojapi.dev)
+    value: ${{ steps.deploy.outputs.preview-url }}
+  promoted:
+    description: Whether the deployment serves production ("true" or "false")
+    value: ${{ steps.deploy.outputs.promoted }}
+
+runs:
+  using: composite
+  steps:
+    - id: node
+      shell: bash
+      run: |
+        if command -v node >/dev/null 2>&1 && node -e 'process.exit(Number(process.versions.node.split(".")[0]) >= 20 ? 0 : 1)'; then
+          echo "setup=false" >> "$GITHUB_OUTPUT"
+        else
+          echo "setup=true" >> "$GITHUB_OUTPUT"
+        fi
+    - if: steps.node.outputs.setup == 'true'
+      uses: actions/setup-node@v4
+      with:
+        node-version: 22
+    - name: Install dependencies
+      shell: bash
+      working-directory: ${{ inputs.working-directory }}
+      env:
+        INSTALL: ${{ inputs.install }}
+      run: |
+        case "$INSTALL" in
+          false) ;;
+          true) if [ -f package-lock.json ]; then npm ci; else npm install; fi ;;
+          *) if [ -f package-lock.json ] && [ ! -d node_modules ]; then npm ci; fi ;;
+        esac
+    - name: Deploy
+      id: deploy
+      shell: bash
+      working-directory: ${{ inputs.working-directory }}
+      env:
+        JOJAPI_TOKEN: ${{ inputs.token }}
+        INPUT_PRODUCTION: ${{ inputs.production }}
+        INPUT_MESSAGE: ${{ inputs.message }}
+        INPUT_COMMENT: ${{ inputs.comment }}
+        INPUT_GITHUB_TOKEN: ${{ inputs.github-token }}
+        INPUT_CLI_VERSION: ${{ inputs.cli-version }}
+      run: node "$GITHUB_ACTION_PATH/src/run.mjs"

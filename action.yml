@@ -1,5 +1,5 @@
 name: Deploy to JoJ API
-description: Deploy a JoJ API Worker. A preview deployment for every pull request, production on the default branch.
+description: "Deploy a JoJ API Worker with the jojapi CLI: a preview deployment for every pull request, production on the default branch."
 author: Apryco, LLC
 branding:
   icon: upload-cloud

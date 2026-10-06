@@ -37,6 +37,12 @@ test("CLI arguments: pinned version, --prod, the message as one argument", () =>
   assert.throws(() => cliArgs({ version: "1.0; rm", production: false, message: "" }), /npm version/);
 });
 
+test("CLI arguments: the release note goes with production only, as one argument", () => {
+  assert.deepEqual(cliArgs({ version: "0.2.1", production: true, message: "", note: "--TEST release note" }), ["--yes", "@jojapi/cli@0.2.1", "deploy", "--json", "--prod", "--note=--TEST release note"]);
+  assert.deepEqual(cliArgs({ version: "0.2.1", production: false, message: "", note: "TEST release note" }), ["--yes", "@jojapi/cli@0.2.1", "deploy", "--json"]);
+  assert.deepEqual(cliArgs({ version: "0.2.1", production: true, message: "", note: "" }), ["--yes", "@jojapi/cli@0.2.1", "deploy", "--json", "--prod"]);
+});
+
 test("results: the CLI's JSON line, refusals and crashes become failed with their message", () => {
   assert.deepEqual(parseResult(0, "bundling…\n" + JSON.stringify(PREVIEW) + "\n", ""), PREVIEW);
   assert.equal(parseResult(0, '{"status":"unchanged"}\n', "").status, "unchanged");

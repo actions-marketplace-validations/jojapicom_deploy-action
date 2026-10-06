@@ -64,6 +64,20 @@ restores the template. Roll back from the **Deployments** tab or with `npx @joja
 Previews answer the API keys of the account that owns the API; make a deployment **Public** in
 the Studio to share it.
 
+## Release notes
+
+The deployment's description (`message`) stays in your Studio. Consumers read a production deploy
+under **Releases** on the API page only when it carries a release note; without one, only the page's
+"Last updated" date moves. Pass the note from wherever your workflow keeps it, for example a step
+that reads it from the merged pull request:
+
+```yaml
+      - uses: jojapicom/deploy-action@v1
+        with:
+          token: ${{ secrets.JOJAPI_TOKEN }}
+          note: ${{ steps.release.outputs.note }}
+```
+
 ## Inputs
 
 | Input | Default | Description |
@@ -71,7 +85,8 @@ the Studio to share it.
 | `token` | — | Management API token with `code:read` and `code:write`. Pass it from a secret |
 | `working-directory` | `.` | Folder with the API's `jojapi.json` and files |
 | `production` | `auto` | `auto`: production on pushes to the default branch, a preview otherwise. `true` or `false` forces it |
-| `message` | pull request title or commit subject | Description of the deployment |
+| `message` | pull request title or commit subject | Description of the deployment, shown in your Studio |
+| `note` | — | Public release note of a production deploy, listed under **Releases** on the API page. Ignored on previews |
 | `comment` | `true` | Comment the preview URL on the pull request (needs `pull-requests: write`) |
 | `install` | `auto` | `auto`: `npm ci` when `package-lock.json` exists and `node_modules` does not. `true` always installs, `false` never does. For pnpm or yarn, install in an earlier step |
 | `github-token` | `${{ github.token }}` | Token for the pull request comment |

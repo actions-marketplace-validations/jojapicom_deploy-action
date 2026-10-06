@@ -16,7 +16,10 @@ inputs:
     description: "auto: production on pushes to the default branch, a preview otherwise. true or false forces it."
     default: auto
   message:
-    description: Description of the deployment. Defaults to the pull request title or the commit subject.
+    description: Description of the deployment, shown in your Studio. Defaults to the pull request title or the commit subject.
+    default: ""
+  note:
+    description: Public release note of a production deploy, listed under Releases on the API page. Ignored on previews; empty records no release note.
     default: ""
   comment:
     description: Comment the preview URL on the pull request (needs the pull-requests write permission).
@@ -29,7 +32,7 @@ inputs:
     default: ${{ github.token }}
   cli-version:
     description: Version of @jojapi/cli to run.
-    default: 0.2.0
+    default: 0.2.1
 
 outputs:
   status:
@@ -85,6 +88,7 @@ runs:
         JOJAPI_TOKEN: ${{ inputs.token }}
         INPUT_PRODUCTION: ${{ inputs.production }}
         INPUT_MESSAGE: ${{ inputs.message }}
+        INPUT_NOTE: ${{ inputs.note }}
         INPUT_COMMENT: ${{ inputs.comment }}
         INPUT_GITHUB_TOKEN: ${{ inputs.github-token }}
         INPUT_CLI_VERSION: ${{ inputs.cli-version }}

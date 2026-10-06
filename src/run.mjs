@@ -3,7 +3,7 @@
 // request comment. Node built-ins only, so the action needs no build step.
 //
 // Environment (set by action.yml): JOJAPI_TOKEN (only this reaches the CLI,
-// never printed), INPUT_PRODUCTION, INPUT_MESSAGE, INPUT_COMMENT,
+// never printed), INPUT_PRODUCTION, INPUT_MESSAGE, INPUT_NOTE, INPUT_COMMENT,
 // INPUT_GITHUB_TOKEN, INPUT_CLI_VERSION, plus the runner's GITHUB_* variables.
 
 import { spawn } from "node:child_process";
@@ -40,12 +40,14 @@ export function withoutSecrets(env, event) {
   return env.GITHUB_ACTOR === "dependabot[bot]" || pr.user?.login === "dependabot[bot]";
 }
 
-export function cliArgs({ version, production, message }) {
+export function cliArgs({ version, production, message, note }) {
   if (!/^[0-9A-Za-z][0-9A-Za-z.+-]*$/.test(version)) throw new Error(`cli-version must be an npm version or tag, not "${version}"`);
   const args = ["--yes", `@jojapi/cli@${version}`, "deploy", "--json"];
   if (production) args.push("--prod");
-  // One argument, so a message starting with "--" stays a message
+  // One argument each, so a message or note starting with "--" stays text
   if (message) args.push(`--message=${message}`);
+  // The release note is public and belongs to production; a preview ignores it
+  if (production && note) args.push(`--note=${note}`);
   return args;
 }
 
@@ -219,7 +221,12 @@ export async function main(env = process.env) {
   let args;
   try {
     production = wantsProduction(env.INPUT_PRODUCTION, env, event);
-    args = cliArgs({ version: String(env.INPUT_CLI_VERSION ?? "").trim(), production, message: String(env.INPUT_MESSAGE ?? "").trim() });
+    args = cliArgs({
+      version: String(env.INPUT_CLI_VERSION ?? "").trim(),
+      production,
+      message: String(env.INPUT_MESSAGE ?? "").trim(),
+      note: String(env.INPUT_NOTE ?? "").trim(),
+    });
   } catch (err) {
     annotate("error", err.message);
     return 1;
